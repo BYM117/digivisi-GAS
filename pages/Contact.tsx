@@ -1,6 +1,9 @@
+
 import React, { useState } from 'react';
 import { Send, Paperclip } from 'lucide-react';
 import { ServiceType } from '../types';
+import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
+import { db } from '../firebase';
 
 const Contact: React.FC = () => {
   const [formData, setFormData] = useState({
@@ -13,6 +16,7 @@ const Contact: React.FC = () => {
     message: '',
   });
   const [submitted, setSubmitted] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleServiceChange = (service: ServiceType) => {
     setFormData(prev => {
@@ -28,11 +32,26 @@ const Contact: React.FC = () => {
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Mock submission
-    console.log("Submitting Form:", formData);
-    setTimeout(() => setSubmitted(true), 1000);
+    setIsSubmitting(true);
+
+    try {
+      // Save to Firebase Firestore
+      await addDoc(collection(db, "inquiries"), {
+        ...formData,
+        status: 'NEW',
+        createdAt: serverTimestamp(), // Use server timestamp
+        date: new Date().toISOString().split('T')[0] // Fallback date string
+      });
+      
+      setSubmitted(true);
+    } catch (error) {
+      console.error("Error adding document: ", error);
+      alert("문의 접수 중 오류가 발생했습니다. 다시 시도해주세요.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   if (submitted) {
@@ -176,9 +195,10 @@ const Contact: React.FC = () => {
             <div className="pt-8">
                 <button 
                     type="submit" 
-                    className="w-full md:w-auto px-12 py-4 bg-brand-black text-white font-bold text-lg hover:bg-brand-red transition-colors duration-300"
+                    disabled={isSubmitting}
+                    className={`w-full md:w-auto px-12 py-4 bg-brand-black text-white font-bold text-lg hover:bg-brand-red transition-colors duration-300 ${isSubmitting ? 'opacity-50 cursor-not-allowed' : ''}`}
                 >
-                    문의 보내기
+                    {isSubmitting ? '전송 중...' : '문의 보내기'}
                 </button>
             </div>
         </form>

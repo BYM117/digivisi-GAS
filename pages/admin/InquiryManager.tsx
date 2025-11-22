@@ -1,17 +1,33 @@
 
-import React, { useState } from 'react';
-import { MOCK_INQUIRIES } from '../../constants';
+import React, { useEffect, useState } from 'react';
 import { Inquiry } from '../../types';
 import { MoreHorizontal, Search } from 'lucide-react';
+import { collection, onSnapshot, query, orderBy } from 'firebase/firestore';
+import { db } from '../../firebase';
 
 const InquiryManager: React.FC = () => {
-  const [inquiries] = useState<Inquiry[]>(MOCK_INQUIRIES);
+  const [inquiries, setInquiries] = useState<Inquiry[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const q = query(collection(db, "inquiries"), orderBy("createdAt", "desc"));
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const loadedInquiries = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      })) as Inquiry[];
+      setInquiries(loadedInquiries);
+      setLoading(false);
+    });
+
+    return () => unsubscribe();
+  }, []);
 
   const filteredInquiries = inquiries.filter(i => 
-    i.name.includes(searchTerm) || 
-    i.company.includes(searchTerm) || 
-    i.email.includes(searchTerm)
+    i.name?.toLowerCase().includes(searchTerm.toLowerCase()) || 
+    i.company?.toLowerCase().includes(searchTerm.toLowerCase()) || 
+    i.email?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   return (
@@ -46,45 +62,46 @@ const InquiryManager: React.FC = () => {
               </tr>
             </thead>
             <tbody className="divide-y divide-neutral-100">
-              {filteredInquiries.map((inquiry) => (
-                <tr key={inquiry.id} className="hover:bg-neutral-50 transition-colors group">
-                   <td className="px-6 py-4 align-top">
-                    <span className={`inline-block px-2 py-1 rounded text-[10px] font-bold uppercase ${
-                      inquiry.status === 'NEW' ? 'bg-red-100 text-red-600' :
-                      inquiry.status === 'IN_PROGRESS' ? 'bg-blue-100 text-blue-600' :
-                      'bg-gray-100 text-gray-600'
-                    }`}>
-                      {inquiry.status.replace('_', ' ')}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 text-neutral-500 whitespace-nowrap align-top">{inquiry.date}</td>
-                  <td className="px-6 py-4 align-top">
-                    <div className="font-bold">{inquiry.company}</div>
-                    <div className="text-xs text-neutral-500">{inquiry.name}</div>
-                  </td>
-                   <td className="px-6 py-4 align-top">
-                    <div className="text-neutral-800">{inquiry.phone}</div>
-                    <div className="text-xs text-neutral-400">{inquiry.email}</div>
-                  </td>
-                  <td className="px-6 py-4 text-neutral-500 whitespace-nowrap align-top">{inquiry.budget}</td>
-                  <td className="px-6 py-4 text-neutral-500 whitespace-nowrap align-top">{inquiry.schedule}</td>
-                  <td className="px-6 py-4 text-neutral-600 max-w-xs align-top">
-                    <p className="line-clamp-2 text-xs leading-relaxed">{inquiry.message}</p>
-                  </td>
-                  <td className="px-6 py-4 text-right align-top">
-                    <button className="text-neutral-400 hover:text-brand-black p-1">
-                      <MoreHorizontal size={18} />
-                    </button>
-                  </td>
-                </tr>
-              ))}
+              {loading ? (
+                 <tr><td colSpan={8} className="text-center py-12 text-neutral-400">Loading data...</td></tr>
+              ) : filteredInquiries.length === 0 ? (
+                 <tr><td colSpan={8} className="text-center py-12 text-neutral-400">No inquiries found.</td></tr>
+              ) : (
+                filteredInquiries.map((inquiry) => (
+                    <tr key={inquiry.id} className="hover:bg-neutral-50 transition-colors group">
+                    <td className="px-6 py-4 align-top">
+                        <span className={`inline-block px-2 py-1 rounded text-[10px] font-bold uppercase ${
+                        inquiry.status === 'NEW' ? 'bg-red-100 text-red-600' :
+                        inquiry.status === 'IN_PROGRESS' ? 'bg-blue-100 text-blue-600' :
+                        'bg-gray-100 text-gray-600'
+                        }`}>
+                        {inquiry.status ? inquiry.status.replace('_', ' ') : 'NEW'}
+                        </span>
+                    </td>
+                    <td className="px-6 py-4 text-neutral-500 whitespace-nowrap align-top">{inquiry.date}</td>
+                    <td className="px-6 py-4 align-top">
+                        <div className="font-bold">{inquiry.company}</div>
+                        <div className="text-xs text-neutral-500">{inquiry.name}</div>
+                    </td>
+                    <td className="px-6 py-4 align-top">
+                        <div className="text-neutral-800">{inquiry.phone}</div>
+                        <div className="text-xs text-neutral-400">{inquiry.email}</div>
+                    </td>
+                    <td className="px-6 py-4 text-neutral-500 whitespace-nowrap align-top">{inquiry.budget}</td>
+                    <td className="px-6 py-4 text-neutral-500 whitespace-nowrap align-top">{inquiry.schedule}</td>
+                    <td className="px-6 py-4 text-neutral-600 max-w-xs align-top">
+                        <p className="line-clamp-2 text-xs leading-relaxed">{inquiry.message}</p>
+                    </td>
+                    <td className="px-6 py-4 text-right align-top">
+                        <button className="text-neutral-400 hover:text-brand-black p-1">
+                        <MoreHorizontal size={18} />
+                        </button>
+                    </td>
+                    </tr>
+                ))
+              )}
             </tbody>
           </table>
-          {filteredInquiries.length === 0 && (
-            <div className="p-12 text-center text-neutral-400">
-                No inquiries found.
-            </div>
-          )}
         </div>
       </div>
     </div>

@@ -2,20 +2,25 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Lock } from 'lucide-react';
+import { signInWithEmailAndPassword } from 'firebase/auth';
+import { auth } from '../../firebase';
 
 const AdminLogin: React.FC = () => {
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [error, setError] = useState(false);
+  const [error, setError] = useState('');
   const navigate = useNavigate();
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Demo password
-    if (password === 'admin1234') {
-      localStorage.setItem('admin_auth', 'true');
+    setError('');
+
+    try {
+      await signInWithEmailAndPassword(auth, email, password);
       navigate('/admin/dashboard');
-    } else {
-      setError(true);
+    } catch (err) {
+      console.error(err);
+      setError('이메일 또는 비밀번호를 확인해주세요.');
     }
   };
 
@@ -28,19 +33,26 @@ const AdminLogin: React.FC = () => {
           </div>
         </div>
         <h1 className="text-2xl font-bold text-center mb-2">DIGIVISI Admin</h1>
-        <p className="text-neutral-500 text-center mb-8 text-sm">관리자 모드에 접속하려면 비밀번호를 입력하세요.</p>
+        <p className="text-neutral-500 text-center mb-8 text-sm">Firebase 관리자 계정으로 로그인하세요.</p>
         
         <form onSubmit={handleLogin} className="space-y-4">
           <div>
+             <input
+              type="email"
+              value={email}
+              onChange={(e) => { setEmail(e.target.value); setError(''); }}
+              className="w-full border border-neutral-300 p-3 rounded focus:outline-none focus:border-brand-black transition-colors mb-4"
+              placeholder="admin@email.com"
+              autoFocus
+            />
             <input
               type="password"
               value={password}
-              onChange={(e) => { setPassword(e.target.value); setError(false); }}
+              onChange={(e) => { setPassword(e.target.value); setError(''); }}
               className="w-full border border-neutral-300 p-3 rounded focus:outline-none focus:border-brand-black transition-colors"
               placeholder="Password"
-              autoFocus
             />
-            {error && <p className="text-brand-red text-xs mt-2">비밀번호가 올바르지 않습니다.</p>}
+            {error && <p className="text-brand-red text-xs mt-2">{error}</p>}
           </div>
           <button
             type="submit"

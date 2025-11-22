@@ -1,7 +1,9 @@
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { LayoutDashboard, MessageSquare, Image, LogOut, BarChart3 } from 'lucide-react';
+import { onAuthStateChanged, signOut } from 'firebase/auth';
+import { auth } from '../../firebase';
 
 interface AdminLayoutProps {
   children: React.ReactNode;
@@ -10,16 +12,21 @@ interface AdminLayoutProps {
 const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
   const location = useLocation();
   const navigate = useNavigate();
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const isAuth = localStorage.getItem('admin_auth');
-    if (!isAuth) {
-      navigate('/admin/login');
-    }
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (!user) {
+        navigate('/admin/login');
+      }
+      setLoading(false);
+    });
+
+    return () => unsubscribe();
   }, [navigate]);
 
-  const handleLogout = () => {
-    localStorage.removeItem('admin_auth');
+  const handleLogout = async () => {
+    await signOut(auth);
     navigate('/');
   };
 
@@ -30,10 +37,14 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
     { name: 'Portfolio', path: '/admin/portfolio', icon: Image },
   ];
 
+  if (loading) {
+      return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
+  }
+
   return (
     <div className="min-h-screen bg-neutral-100 flex">
       {/* Sidebar */}
-      <aside className="w-64 bg-brand-black text-white flex flex-col fixed h-full">
+      <aside className="w-64 bg-brand-black text-white flex flex-col fixed h-full z-50">
         <div className="p-6 border-b border-neutral-800">
           <h1 className="text-xl font-bold tracking-tighter">DIGIVISI <span className="text-brand-red text-sm font-normal ml-1">ADMIN</span></h1>
         </div>
