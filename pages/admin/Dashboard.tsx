@@ -1,13 +1,36 @@
-
-import React from 'react';
-import { MOCK_INQUIRIES } from '../../constants';
+import React, { useEffect, useState } from 'react';
 import { MessageSquare, AlertCircle, CheckCircle } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { collection, query, orderBy, onSnapshot } from 'firebase/firestore';
+import { db } from '../../firebase';
+import { Inquiry } from '../../types';
 
 const Dashboard: React.FC = () => {
-  const totalInquiries = MOCK_INQUIRIES.length;
-  const newInquiries = MOCK_INQUIRIES.filter(i => i.status === 'NEW').length;
-  const pendingInquiries = MOCK_INQUIRIES.filter(i => i.status === 'IN_PROGRESS').length;
+  const [inquiries, setInquiries] = useState<Inquiry[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    // Fetch Inquiries Real-time
+    const q = query(collection(db, "inquiries"), orderBy("createdAt", "desc"));
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const data = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      })) as Inquiry[];
+      setInquiries(data);
+      setLoading(false);
+    });
+
+    return () => unsubscribe();
+  }, []);
+
+  const totalInquiries = inquiries.length;
+  const newInquiries = inquiries.filter(i => i.status === 'NEW').length;
+  const pendingInquiries = inquiries.filter(i => i.status === 'IN_PROGRESS').length;
+
+  if (loading) {
+    return <div className="p-8 text-center text-neutral-400">Loading Dashboard Data...</div>;
+  }
 
   return (
     <div className="space-y-8">
@@ -61,23 +84,29 @@ const Dashboard: React.FC = () => {
               </tr>
             </thead>
             <tbody className="divide-y divide-neutral-100">
-              {MOCK_INQUIRIES.slice(0, 3).map((inquiry) => (
-                <tr key={inquiry.id} className="hover:bg-neutral-50 transition-colors">
-                   <td className="px-6 py-4">
-                    <span className={`px-2 py-1 rounded text-[10px] font-bold uppercase ${
-                      inquiry.status === 'NEW' ? 'bg-red-100 text-red-600' :
-                      inquiry.status === 'IN_PROGRESS' ? 'bg-blue-100 text-blue-600' :
-                      'bg-gray-100 text-gray-600'
-                    }`}>
-                      {inquiry.status.replace('_', ' ')}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 text-neutral-500">{inquiry.date}</td>
-                  <td className="px-6 py-4 font-medium">{inquiry.name}</td>
-                  <td className="px-6 py-4 text-neutral-500">{inquiry.company}</td>
-                  <td className="px-6 py-4 text-neutral-500">{inquiry.services.join(', ')}</td>
+              {inquiries.length === 0 ? (
+                <tr>
+                  <td colSpan={5} className="px-6 py-8 text-center text-neutral-400">No inquiries yet.</td>
                 </tr>
-              ))}
+              ) : (
+                inquiries.slice(0, 5).map((inquiry) => (
+                  <tr key={inquiry.id} className="hover:bg-neutral-50 transition-colors">
+                    <td className="px-6 py-4">
+                      <span className={`px-2 py-1 rounded text-[10px] font-bold uppercase ${
+                        inquiry.status === 'NEW' ? 'bg-red-100 text-red-600' :
+                        inquiry.status === 'IN_PROGRESS' ? 'bg-blue-100 text-blue-600' :
+                        'bg-gray-100 text-gray-600'
+                      }`}>
+                        {inquiry.status ? inquiry.status.replace('_', ' ') : 'NEW'}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 text-neutral-500">{inquiry.date}</td>
+                    <td className="px-6 py-4 font-medium">{inquiry.name}</td>
+                    <td className="px-6 py-4 text-neutral-500">{inquiry.company}</td>
+                    <td className="px-6 py-4 text-neutral-500">{inquiry.services?.join(', ')}</td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
         </div>

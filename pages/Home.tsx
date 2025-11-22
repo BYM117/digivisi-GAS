@@ -1,9 +1,32 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight, Check, Monitor, Camera, Bot } from 'lucide-react';
-import { SERVICES, PROCESS_STEPS, PORTFOLIO_ITEMS } from '../constants';
+import { SERVICES, PROCESS_STEPS } from '../constants';
+import { collection, getDocs, query, orderBy, limit } from 'firebase/firestore';
+import { db } from '../firebase';
+import { PortfolioItem } from '../types';
 
 const Home: React.FC = () => {
+  const [recentWorks, setRecentWorks] = useState<PortfolioItem[]>([]);
+  
+  useEffect(() => {
+    const fetchRecentWorks = async () => {
+      try {
+        // Fetch top 3 recent items
+        const q = query(collection(db, "portfolio"), orderBy("createdAt", "desc"), limit(3));
+        const querySnapshot = await getDocs(q);
+        const loadedItems = querySnapshot.docs.map(doc => ({
+            id: doc.id,
+            ...doc.data()
+        })) as PortfolioItem[];
+        setRecentWorks(loadedItems);
+      } catch (error) {
+        console.error("Error fetching recent works:", error);
+      }
+    };
+    fetchRecentWorks();
+  }, []);
+
   return (
     <div className="w-full">
       {/* HERO SECTION */}
@@ -112,23 +135,31 @@ const Home: React.FC = () => {
             <h2 className="text-3xl font-bold tracking-tight">Recent Works</h2>
             <Link to="/portfolio" className="text-sm text-neutral-500 hover:text-brand-red underline decoration-1 underline-offset-4">전체 보기</Link>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {PORTFOLIO_ITEMS.slice(0, 3).map((item) => (
-              <Link key={item.id} to="/portfolio" className="group relative aspect-[4/5] overflow-hidden bg-neutral-100">
-                <img 
-                  src={item.imageUrl} 
-                  alt={item.title} 
-                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 group-hover:grayscale-0 grayscale"
-                />
-                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300 flex items-end p-6">
-                  <div className="translate-y-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300">
-                    <span className="text-xs font-bold text-brand-red uppercase tracking-wider mb-1 block">{item.category.replace('_', ' ')}</span>
-                    <h3 className="text-white font-medium">{item.title}</h3>
+          
+          {recentWorks.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {recentWorks.map((item) => (
+                <Link key={item.id} to="/portfolio" className="group relative aspect-[4/5] overflow-hidden bg-neutral-100">
+                  <img 
+                    src={item.imageUrl} 
+                    alt={item.title} 
+                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 group-hover:grayscale-0 grayscale"
+                    onError={(e) => { (e.target as HTMLImageElement).src = 'https://via.placeholder.com/400x500?text=No+Image'; }}
+                  />
+                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300 flex items-end p-6">
+                    <div className="translate-y-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300">
+                      <span className="text-xs font-bold text-brand-red uppercase tracking-wider mb-1 block">{item.category.replace('_', ' ')}</span>
+                      <h3 className="text-white font-medium">{item.title}</h3>
+                    </div>
                   </div>
-                </div>
-              </Link>
-            ))}
-          </div>
+                </Link>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-12 bg-neutral-50 text-neutral-400 border border-neutral-100 rounded">
+              <p>업데이트된 포트폴리오가 없습니다. 관리자 페이지에서 추가해주세요.</p>
+            </div>
+          )}
         </div>
       </section>
 
