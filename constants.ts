@@ -1,4 +1,5 @@
-import { ServiceType, ServiceInfo, PortfolioItem, ProcessStep } from './types';
+
+import { ServiceType, ServiceInfo, PortfolioItem, ProcessStep, Inquiry } from './types';
 
 export const CONTACT_EMAIL = "contact@digivisi.com";
 export const INSTAGRAM_LINK = "https://instagram.com/digivisi";
@@ -67,4 +68,46 @@ export const PROCESS_STEPS: ProcessStep[] = [
   { step: 4, title: "Retouching", description: "전문가의 후보정 및 퀄리티 업" },
   { step: 5, title: "Delivery", description: "최종 결과물 납품 및 피드백" },
   { step: 6, title: "Setup", description: "(Option) 현장 설치 및 운영 지원" },
+];
+
+export const MOCK_INQUIRIES: Inquiry[] = [
+  {
+    id: '1001',
+    date: '2024-05-20',
+    name: '김철수',
+    company: '스타트업 A',
+    phone: '010-1234-5678',
+    email: 'kim@startup-a.com',
+    services: [ServiceType.PHOTO_VIDEO],
+    budget: '3m_5m',
+    schedule: '2024.06.15',
+    message: '투자 유치를 위한 IR 행사 스케치 촬영 문의드립니다.',
+    status: 'NEW'
+  },
+  {
+    id: '1002',
+    date: '2024-05-19',
+    name: '이영희',
+    company: '뷰티 브랜드 B',
+    phone: '010-9876-5432',
+    email: 'lee@beauty-b.co.kr',
+    services: [ServiceType.FRAME, ServiceType.AI_CREATIVE],
+    budget: '5m_10m',
+    schedule: '2024.07.01',
+    message: '성수동 팝업스토어에 설치할 디지털 액자 5대와 그 안에 들어갈 AI 기반 브랜드 영상 제작이 필요합니다.',
+    status: 'IN_PROGRESS'
+  },
+  {
+    id: '1003',
+    date: '2024-05-18',
+    name: '박지성',
+    company: '전시기획사 C',
+    phone: '010-5555-7777',
+    email: 'park@exhibit-c.com',
+    services: [ServiceType.FRAME],
+    budget: 'over_10m',
+    schedule: '2024.08.10',
+    message: '대형 미디어 아트 전시를 기획 중입니다. 장기 렌탈 견적 부탁드립니다.',
+    status: 'COMPLETED'
+  }
 ];

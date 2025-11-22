@@ -1,3 +1,4 @@
+
 export enum ServiceType {
   FRAME = 'FRAME',
   PHOTO_VIDEO = 'PHOTO_VIDEO',
@@ -27,4 +28,20 @@ export interface ProcessStep {
   step: number;
   title: string;
   description: string;
+}
+
+export type InquiryStatus = 'NEW' | 'IN_PROGRESS' | 'COMPLETED';
+
+export interface Inquiry {
+  id: string;
+  date: string;
+  name: string;
+  company: string;
+  phone: string;
+  email: string;
+  services: ServiceType[];
+  budget: string;
+  schedule: string;
+  message: string;
+  status: InquiryStatus;
 }

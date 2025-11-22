@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Menu, X, ArrowRight } from 'lucide-react';
@@ -161,6 +162,9 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                © 2024 DIGIVISI. All rights reserved.<br/>
                Business Registration: 000-00-00000
              </p>
+             <Link to="/admin/login" className="text-[10px] text-neutral-400 hover:text-brand-red mt-4 block transition-colors">
+                Admin
+             </Link>
           </div>
         </div>
       </footer>
