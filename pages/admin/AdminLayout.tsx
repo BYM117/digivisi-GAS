@@ -2,7 +2,6 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { LayoutDashboard, MessageSquare, Image, LogOut, BarChart3 } from 'lucide-react';
-import { onAuthStateChanged, signOut } from 'firebase/auth';
 import { auth } from '../../firebase';
 
 interface AdminLayoutProps {
@@ -15,7 +14,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
+    const unsubscribe = auth.onAuthStateChanged((user) => {
       if (!user) {
         navigate('/admin/login');
       }
@@ -26,7 +25,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
   }, [navigate]);
 
   const handleLogout = async () => {
-    await signOut(auth);
+    await auth.signOut();
     navigate('/');
   };
 

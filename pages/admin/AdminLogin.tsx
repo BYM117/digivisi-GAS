@@ -2,7 +2,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Lock } from 'lucide-react';
-import { signInWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '../../firebase';
 
 const AdminLogin: React.FC = () => {
@@ -16,7 +15,7 @@ const AdminLogin: React.FC = () => {
     setError('');
 
     try {
-      await signInWithEmailAndPassword(auth, email, password);
+      await auth.signInWithEmailAndPassword(email, password);
       navigate('/admin/dashboard');
     } catch (err) {
       console.error(err);
