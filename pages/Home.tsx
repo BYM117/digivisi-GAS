@@ -11,9 +11,7 @@ import { PortfolioItem } from '../types';
 const HERO_SLIDES = [
   {
     id: 1,
-    // [수정 완료] CSS 프레임 효과를 제거하고 실제 제품 사진이 보이도록 변경했습니다.
-    // 고객님이 업로드하신 '반 고흐 자화상이 담긴 블랙 프레임' 제품 사진의 URL을 아래에 넣어주세요.
-    // 현재는 가장 유사한 제품 연출 컷(블랙 프레임 + 아트)으로 세팅했습니다.
+    // Naver pstatic images often require no-referrer policy to work on external sites
     image: "https://postfiles.pstatic.net/MjAyNTEyMTlfMTE4/MDAxNzY2MDgzMzYyNTQx.tHEiLvM1DvS1anl4OjLMXzkWsjMdXKiw4x4w0MMhuG0g.ycvlMyOiSb8XPblcZIMwzVNmR83lGSGnYsVHtQ-BISEg.PNG/%EB%8B%A4%EC%9A%B4%EB%A1%9C%EB%93%9C_(4).png?type=w966",
     label: "DIGITAL FRAME",
     sub: "Space Direction"
@@ -129,7 +127,8 @@ const Home: React.FC = () => {
                                 <img 
                                     src={slide.image} 
                                     alt={slide.label} 
-                                    className="w-full h-full object-contain drop-shadow-2xl" 
+                                    className="w-full h-full object-contain drop-shadow-2xl"
+                                    referrerPolicy="no-referrer"
                                 />
                                 
                                 {/* Label Tag - Animated */}
