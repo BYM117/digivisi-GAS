@@ -65,16 +65,21 @@ const Home: React.FC = () => {
       {/* NEW HERO SECTION: Clean White + Korean Type + Slideshow */}
       <section className="relative min-h-screen w-full bg-white text-brand-black overflow-hidden flex flex-col pt-20 md:pt-0">
         
-        {/* Simple Grid Lines (Subtle) */}
+        {/* Simple Grid Lines (Subtle) - Kept at viewport edges for framing, but content will align inwardly */}
         <div className="absolute inset-0 pointer-events-none opacity-30">
             <div className="absolute left-6 md:left-12 top-0 bottom-0 w-[1px] bg-neutral-200"></div>
             <div className="absolute right-6 md:right-12 top-0 bottom-0 w-[1px] bg-neutral-200"></div>
         </div>
 
-        <div className="flex-grow grid grid-cols-1 md:grid-cols-12 h-full relative z-10 max-w-[1920px] mx-auto w-full items-center">
+        {/* 
+          Main Content Container
+          Changed from max-w-[1920px] to max-w-7xl to match Header layout exactly.
+          Removed md:pl-24 to align text start with Logo.
+        */}
+        <div className="flex-grow max-w-7xl mx-auto px-6 w-full h-full relative z-10 grid grid-cols-1 md:grid-cols-2 items-center">
             
             {/* Left Content: Typography */}
-            <div className="col-span-12 md:col-span-6 flex flex-col justify-center px-6 md:pl-24 relative z-20 mt-12 md:mt-0 order-2 md:order-1">
+            <div className="flex flex-col justify-center relative z-20 mt-12 md:mt-0 order-2 md:order-1">
                 <div className="mb-6 inline-flex items-center space-x-3">
                     <span className="w-12 h-[1px] bg-brand-red"></span>
                     <span className="text-xs font-bold tracking-widest uppercase text-neutral-400">Visual Production Studio</span>
@@ -100,7 +105,7 @@ const Home: React.FC = () => {
             </div>
 
             {/* Right Content: Object Slideshow */}
-            <div className="col-span-12 md:col-span-6 relative h-[50vh] md:h-screen w-full flex items-center justify-center overflow-hidden order-1 md:order-2">
+            <div className="relative h-[50vh] md:h-screen w-full flex items-center justify-center overflow-visible order-1 md:order-2">
                  
                  {/* Slides */}
                  {HERO_SLIDES.map((slide, index) => (
@@ -122,8 +127,8 @@ const Home: React.FC = () => {
                              index === currentSlide ? 'scale-100' : 'scale-105'
                         }`}>
                             
-                            {/* Image Container - Using object-contain to show the FULL product including frame */}
-                            <div className="relative w-[80%] h-[80%] md:w-[70%] md:h-[70%] flex items-center justify-center">
+                            {/* Image Container */}
+                            <div className="relative w-[80%] h-[80%] md:w-full md:h-[80%] flex items-center justify-center">
                                 <img 
                                     src={slide.image} 
                                     alt={slide.label} 
@@ -132,7 +137,7 @@ const Home: React.FC = () => {
                                 />
                                 
                                 {/* Label Tag - Animated */}
-                                <div className={`absolute -bottom-0 -left-4 md:-bottom-12 md:-left-12 bg-white/90 backdrop-blur-sm p-4 md:p-6 shadow-xl border border-neutral-100 transition-all duration-1000 delay-500 ${
+                                <div className={`absolute -bottom-0 -left-4 md:bottom-12 md:-left-12 bg-white/90 backdrop-blur-sm p-4 md:p-6 shadow-xl border border-neutral-100 transition-all duration-1000 delay-500 ${
                                     index === currentSlide ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
                                 }`}>
                                     <span className="block text-[10px] text-neutral-400 font-bold uppercase tracking-widest mb-1">{slide.sub}</span>
@@ -143,8 +148,8 @@ const Home: React.FC = () => {
                     </div>
                  ))}
 
-                 {/* Slide Indicators */}
-                 <div className="absolute bottom-8 right-8 md:bottom-12 md:right-12 flex space-x-3 z-20">
+                 {/* Slide Indicators - Aligned to the right edge of the content container */}
+                 <div className="absolute bottom-8 right-0 md:bottom-12 md:right-0 flex space-x-3 z-20">
                     {HERO_SLIDES.map((_, idx) => (
                         <button 
                             key={idx}
